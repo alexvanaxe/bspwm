@@ -514,7 +514,11 @@ desktop_select_t make_desktop_select(void)
 		.focused = OPTION_NONE,
 		.active = OPTION_NONE,
 		.urgent = OPTION_NONE,
-		.local = OPTION_NONE
+		.local = OPTION_NONE,
+		.tiled = OPTION_NONE,
+		.monocle = OPTION_NONE,
+		.user_tiled = OPTION_NONE,
+		.user_monocle = OPTION_NONE
 	};
 	return sel;
 }
@@ -530,6 +534,8 @@ monitor_select_t make_monitor_select(void)
 
 int node_from_desc(char *desc, coordinates_t *ref, coordinates_t *dst)
 {
+	dst->node = NULL;
+
 	coordinates_t ref_copy = *ref;
 	ref = &ref_copy;
 	char *desc_copy = copy_string(desc, strlen(desc));
@@ -567,8 +573,6 @@ int node_from_desc(char *desc, coordinates_t *ref, coordinates_t *dst)
 		free(desc_copy);
 		return SELECTOR_BAD_MODIFIERS;
 	}
-
-	dst->node = NULL;
 
 	direction_t dir;
 	cycle_dir_t cyc;
@@ -679,6 +683,8 @@ int node_from_desc(char *desc, coordinates_t *ref, coordinates_t *dst)
 
 int desktop_from_desc(char *desc, coordinates_t *ref, coordinates_t *dst)
 {
+	dst->desktop = NULL;
+
 	if (*desc == '%') {
 		locate_desktop(desc + 1, dst);
 		goto end;
@@ -710,8 +716,6 @@ int desktop_from_desc(char *desc, coordinates_t *ref, coordinates_t *dst)
 		free(desc_copy);
 		return SELECTOR_BAD_MODIFIERS;
 	}
-
-	dst->desktop = NULL;
 
 	cycle_dir_t cyc;
 	history_dir_t hdi;
@@ -797,6 +801,8 @@ end:
 
 int monitor_from_desc(char *desc, coordinates_t *ref, coordinates_t *dst)
 {
+	dst->monitor = NULL;
+
 	if (*desc == '%') {
 		locate_monitor(desc + 1, dst);
 		goto end;
@@ -827,8 +833,6 @@ int monitor_from_desc(char *desc, coordinates_t *ref, coordinates_t *dst)
 		free(desc_copy);
 		return SELECTOR_BAD_MODIFIERS;
 	}
-
-	dst->monitor = NULL;
 
 	direction_t dir;
 	cycle_dir_t cyc;
@@ -1242,6 +1246,28 @@ bool desktop_matches(coordinates_t *loc, coordinates_t *ref, desktop_select_t *s
 	    : sel->local == OPTION_FALSE) {
 		return false;
 	}
+
+#define DLAYOUT(p, e) \
+	if (sel->p != OPTION_NONE && \
+	    loc->desktop->layout != e \
+	    ? sel->p == OPTION_TRUE \
+	    : sel->p == OPTION_FALSE) { \
+		return false; \
+	}
+	DLAYOUT(tiled, LAYOUT_TILED)
+	DLAYOUT(monocle, LAYOUT_MONOCLE)
+#undef DLAYOUT
+
+#define DUSERLAYOUT(p, e) \
+	if (sel->p != OPTION_NONE && \
+	    loc->desktop->user_layout != e \
+	    ? sel->p == OPTION_TRUE \
+	    : sel->p == OPTION_FALSE) { \
+		return false; \
+	}
+	DUSERLAYOUT(user_tiled, LAYOUT_TILED)
+	DUSERLAYOUT(user_monocle, LAYOUT_MONOCLE)
+#undef DUSERLAYOUT
 
 	return true;
 }

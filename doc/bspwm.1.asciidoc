@@ -211,6 +211,9 @@ DESKTOP_SEL := [DESKTOP_SEL#](CYCLE_DIR|any|last|newest|older|newer|
                               [MONITOR_SEL:](focused|^<n>)|
                               <desktop_id>|<desktop_name>)[.[!]focused][.[!]active]
                                                           [.[!]occupied][.[!]urgent][.[!]local]
+                                                          [.[!]LAYOUT][.[!]user_LAYOUT]
+
+LAYOUT := tiled|monocle
 ----
 
 Descriptors
@@ -263,6 +266,12 @@ Modifiers
 
 [!]local::
 	Only consider desktops inside the reference monitor.
+
+[!](tiled|monocle)::
+	Only consider desktops with the given layout.
+
+[!](user_tiled|user_monocle)::
+	Only consider desktops which have the given layout as userLayout.
 
 Monitor
 ~~~~~~~
@@ -618,7 +627,7 @@ Commands
 *-a*, *--add* (<class_name>|\*)[:(<instance_name>|\*)[:(<name>|\*)]] [*-o*|*--one-shot*] [monitor=MONITOR_SEL|desktop=DESKTOP_SEL|node=NODE_SEL] [state=STATE] [layer=LAYER] [split_dir=DIR] [split_ratio=RATIO] [(hidden|sticky|private|locked|marked|center|follow|manage|focus|border)=(on|off)] [rectangle=WxH+X+Y]::
 	Create a new rule.
 
-*-r*, *--remove* ^<n>|head|tail|(<class_name>|\*)[:(<instance_name>|\*)[:(<name>|\*)]]...::
+*-r*, *--remove* ^<n>|head|tail|(<class_name>|\*)[:(<instance_name>|\*)[:(<name>|*)]]...::
 	Remove the given rules.
 
 *-l*, *--list*::
