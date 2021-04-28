@@ -701,6 +701,12 @@ int desktop_from_desc(char *desc, coordinates_t *ref, coordinates_t *dst)
 	desc = desc_copy;
 
 	char *hash = strrchr(desc, '#');
+	char *colon = strrchr(desc, ':');
+
+	/* Discard hashes inside a MONITOR_SEL, e.g. `primary#next:focused` */
+	if (hash != NULL && colon != NULL && hash < colon) {
+		hash = NULL;
+	}
 
 	if (hash != NULL) {
 		*hash = '\0';
@@ -714,8 +720,12 @@ int desktop_from_desc(char *desc, coordinates_t *ref, coordinates_t *dst)
 		}
 	}
 
+	/* Discard colons within references, e.g. `DisplayPort-1:focused#next.local` */
+	if (colon != NULL && hash != NULL && colon < hash) {
+		colon = NULL;
+	}
+
 	desktop_select_t sel = make_desktop_select();
-	char *colon = strrchr(desc, ':');
 
 	if (!parse_desktop_modifiers(colon != NULL ? colon : desc, &sel)) {
 		free(desc_copy);
